@@ -3,6 +3,8 @@ package jpv.digitalinovation.personapi.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,9 +29,7 @@ public class PersonService {
 		Person savedPerson = personRepository.save(personToSave);
 		
 		
-		return MessageResponseDTO.builder()
-				.message("Created person with ID " + savedPerson.getId())
-				.build();
+		return createMessageResponse(savedPerson.getId());
 				
 	}
 
@@ -51,6 +51,22 @@ public class PersonService {
 	
 	private Person verifyIfExists(Long id) throws PersonNotFoundException {
 		return  personRepository.findById(id).orElseThrow(()->new PersonNotFoundException(id));
+	}
+
+	public MessageResponseDTO updateById(Long id, @Valid PersonDTO personDTO) throws PersonNotFoundException {
+		verifyIfExists(id);
+		
+		Person personToUpdate = personMapper.toModel(personDTO);
+		Person updatedPerson = personRepository.save(personToUpdate);
+		
+		
+		return createMessageResponse(updatedPerson.getId());
+	}
+
+	private MessageResponseDTO createMessageResponse(Long id) {
+		return MessageResponseDTO.builder()
+				.message("Updated person with ID " + id)
+				.build();
 	}
 	
 	
